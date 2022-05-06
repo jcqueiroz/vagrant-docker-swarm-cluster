@@ -1,6 +1,5 @@
 #Modified version of the REF.script-base.txt file for compatibility with Ubuntu version 20.04 and newer Docker repositories.
 #Author: Jean Queiroz (https://github.com/jcqueiroz)
-
 $install_docker_script = <<SCRIPT
 echo Installing Docker...
 sudo apt update
