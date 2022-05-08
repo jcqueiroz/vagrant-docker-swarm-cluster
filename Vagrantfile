@@ -8,31 +8,28 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
 sudo apt update
 sudo apt install docker-ce -y
+sudo service docker restart
 sudo systemctl status docker
 sudo systemctl enable docker
+sudo service docker restart
 sudo usermod -aG docker ubuntu
 sudo usermod -aG docker vagrant
-ufw allow 22/tcp
-ufw allow 2376/tcp
-ufw allow 2377/tcp
-ufw allow 7946/tcp
-ufw allow 7946/udp
-ufw allow 4789/udp
-ufw reload
-ufw enable
+sudo ufw disable
 systemctl restart docker
 sudo chmod 666 /var/run/docker.sock
-sudo reboot
 SCRIPT
+
 $manager_script = <<SCRIPT
 echo Swarm Init...
 sudo docker swarm init --listen-addr 192.168.56.1:2377 --advertise-addr 192.168.56.1:2377
 sudo docker swarm join-token --quiet worker > /vagrant/worker_token
 SCRIPT
+
 $worker_script = <<SCRIPT
 echo Swarm Join...
 sudo docker swarm join --token $(cat /vagrant/worker_token) 192.168.56.1:2377
 SCRIPT
+
 Vagrant.configure('2') do |config|
 vm_box = 'ubuntu/focal64'
 config.vm.define :manager, primary: true  do |manager|
@@ -50,7 +47,7 @@ config.vm.define :manager, primary: true  do |manager|
       vb.memory = "1024"
     end
   end
-(1..2).each do |i|
+(1..3).each do |i|
     config.vm.define "worker0#{i}" do |worker|
       worker.vm.box = vm_box
       worker.vm.box_check_update = true
